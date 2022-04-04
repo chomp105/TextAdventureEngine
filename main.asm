@@ -38,16 +38,16 @@ exit:
 	xor ebx, ebx			; zero out ebx reg
 	int 0x80			; call kernel
 
-	; The clraction function sets every index of action to 0
+	; The ClearAction subroutine sets every index of "action" to 0
 
-clraction:
+ClearAction:
 	push ecx			; save ecx reg value
 	xor ecx, ecx			; zero out ecx reg
-clrloop:
+ClearActionLoop:
 	mov [action + ecx], byte 0	; zero out nth place of action
 	inc ecx				; increment ecx reg (loop counter)
 	cmp ecx, 100			; compare ecx reg to 100
-	jl clrloop			; if ecx reg lower, loop
+	jl ClearActionLoop		; if ecx reg lower, loop
 	pop ecx				; restore ecx reg value
 	ret				; return
 
