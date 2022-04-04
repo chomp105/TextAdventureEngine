@@ -51,58 +51,56 @@ clrloop:
 	pop ecx				; restore ecx reg value
 	ret				; return
 
-	; The ParseAction function compares action with the commands
-	; It puts the id of any match in the eax reg
+	; The ParseAction subroutine searches through "action" for commands and nouns
+	; The address list that "action" will be tested against must be put in the ebx register
+	; The id of any match will be returned in the eax register
 
 ParseAction:
-	push ebx			; save ebx reg value
 	push ecx			; save ecx reg value
 	push edx			; save edx reg value
 	push edi			; save edi reg value
 	xor eax, eax			; zero out the eax reg
-	mov ebx, commands		; move commands address into ebx reg
 	xor ecx, ecx			; zero out ecx reg
 	xor edx, edx			; zero out edx reg
 	mov edi, action			; move action address into edi reg
 ParseActionLoop:
 	mov al, [edi + ecx]		; move nth byte of action into al reg
-	cmp [ebx + ecx], byte 10	; compare commands + ecx to 10
-	jl ParseLoopEnd			; if commands + ecx equals 10, end
+	cmp [ebx + ecx], byte 10	; compare ebx + ecx to 10
+	jl ParseLoopEnd			; if ebx + ecx equals 10, jump to loop end
 	cmp al, 32			; compare al to 32
-	je ParseActionNextAction	; if al equals 32, return
+	je ParseActionNextAction	; if al equals 32, jump to next action
 	cmp al, 10			; cmp al to 10
-	je ParseActionEnd		; if al equals 10, return
-	cmp al, [ebx + ecx]		; compare al reg to nth byte of commands
-	jne ParseActionNextCommand	; jump to next command if not equal	
+	je ParseActionEnd		; if al equals 10, jump to end
+	cmp al, [ebx + ecx]		; compare al reg to nth byte of ebx
+	jne ParseActionNextCommand	; if al doesn't equal nth byte of ebx, jump to next command	
 	inc ecx				; increment ecx reg (loop counter)	
 	jmp ParseActionLoop		; loop	
 ParseActionLoopEnd:
-	cmp [ebx+ecx], byte 0		; compare commands + ecx reg to 0
-	jne ParseLoopResult		; if commands + ecx reg doesn't equal 0, return
-	inc ecx				; increment ecx
-	jmp ParseActionEnd
+	cmp [ebx+ecx], byte 0		; compare ebx + ecx reg to 0
+	jne ParseLoopResult		; if ebx + ecx reg doesn't equal 0, return
+	inc ecx				; increment ecx (loop counter)
+	jmp ParseActionEnd		; jump to end
 ParseActionResult:	
-	movzx eax, byte [ebx+ecx] 	; move the command id to eax
-	jmp ParseActionEnd		; jump to chkend
+	movzx eax, byte [ebx+ecx] 	; move the id to eax
+	jmp ParseActionEnd		; jump to end
 ParseActionNextCommand:
-	mov edx, commands		; move commands address into edx reg
+	mov edx, commands		; move ebx address into edx reg
 	add edx, 30			; add 31 to edx reg
 	cmp ebx, edx			; compare ebx reg to edx reg
-	je ParseActionNextAction	; if ebx equals edx, jump to chkend
+	je ParseActionNextAction	; if ebx equals edx, jump to end
 	add ebx, 6			; add 6 to ebx reg
 	xor ecx, ecx			; zero out ecx reg
-	jmp ParseActionLoop		; jump to chkloop
+	jmp ParseActionLoop		; jump to main loop
 ParseActionNextAction:
 	add edi, ecx			; add ecx reg to edi reg
 	inc edi				; increment edi reg
 	cmp [edi], byte 0		; compare edi with 0
-	je ParseActionEnd		; if edi equals 0, return
+	je ParseActionEnd		; if edi equals 0, jump to end
 	xor ecx, ecx			; zero out ecx reg
 	mov ebx, commands		; mov commands into ebx reg
-	jmp ParseActionLoop		; jump to chkloop
+	jmp ParseActionLoop		; jump to main loop
 ParseActionEnd:
-	pop edi
+	pop edi				; restore edi reg value
 	pop edx				; restore edx reg value
 	pop ecx				; restore ecx reg value
-	pop ebx				; restore ebx reg value
 	ret				; return
